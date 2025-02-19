@@ -21,14 +21,10 @@ def filter_incorrect_matches(df):
     return filtered_df
 
 def process_comparison(reference_data, uploaded_data):
-    """
-    Process the comparison between reference and uploaded data.
-    """
     # Create dictionaries for quick lookup
     original_jobs_dict = reference_data.set_index('職業')['職註'].to_dict()
     original_industries_dict = reference_data.set_index('行業')['行註'].to_dict()
     
-    # Process data in chunks
     chunk_size = 500
     chunks = [uploaded_data[i:i + chunk_size] for i in range(0, uploaded_data.shape[0], chunk_size)]
     
@@ -36,23 +32,21 @@ def process_comparison(reference_data, uploaded_data):
     all_industry_results = []
     
     for chunk in chunks:
-        # Process jobs
         job_results = []
         for _, row in chunk.iterrows():
             if row['職業'] in original_jobs_dict and original_jobs_dict[row['職業']] == row['職註']:
                 job_results.append('資料正確')
             else:
                 best_matches = get_best_matches_with_code(row['職業'], original_jobs_dict)
-                job_results.append(best_matches)
-        
-        # Process industries
+                job_results.append(str(best_matches))  # 轉為字串
+            
         industry_results = []
         for _, row in chunk.iterrows():
             if row['行業'] in original_industries_dict and original_industries_dict[row['行業']] == row['行註']:
                 industry_results.append('資料正確')
             else:
                 best_matches = get_best_matches_with_code(row['行業'], original_industries_dict)
-                industry_results.append(best_matches)
+                industry_results.append(str(best_matches))  # 轉為字串
         
         all_job_results.extend(job_results)
         all_industry_results.extend(industry_results)
